@@ -4,9 +4,32 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
 	"net/http"
 	"os"
+	"strconv"
 )
+
+func pi(w http.ResponseWriter, req *http.Request) {
+	fmt.Println("pi called")
+	n, err := strconv.Atoi(req.URL.Query().Get("n"))
+	if err != nil || n < 1 {
+		http.NotFound(w, req)
+		return
+	}
+
+	var total int = 0
+	var totalIn int = 0
+	for i := 0; i < n; i++ {
+		var x = rand.Float64()
+		var y = rand.Float64()
+		if x*x+y*y < 1 {
+			totalIn++
+		}
+		total++
+	}
+	fmt.Fprintf(w, "%f\n", float64(totalIn)*4.0/float64(total))
+}
 
 func hi(w http.ResponseWriter, req *http.Request) {
 	fmt.Fprintf(w, "hi🐈\n")
@@ -20,8 +43,12 @@ func healthz(w http.ResponseWriter, req *http.Request) {
 
 func main() {
 	http.HandleFunc("/hi", hi)
+	http.HandleFunc("/pi", pi)
 	http.HandleFunc("/healthz", healthz)
 
 	fmt.Println("Listening on port", os.Getenv("PORT"))
-	http.ListenAndServe(fmt.Sprintf(":%s", os.Getenv("PORT")), nil)
+	err := http.ListenAndServe(fmt.Sprintf(":%s", os.Getenv("PORT")), nil)
+	if err != nil {
+		panic(err)
+	}
 }
