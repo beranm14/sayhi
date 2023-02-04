@@ -41,10 +41,26 @@ func healthz(w http.ResponseWriter, req *http.Request) {
 	fmt.Println("healthz called")
 }
 
+func healthzButBroken(w http.ResponseWriter, req *http.Request) {
+	w.WriteHeader(http.StatusInternalServerError)
+	w.Write([]byte("500 - Something bad happened!"))
+	fmt.Println("healthz-but-broken called")
+}
+
+func healthzButSometimesBroken(w http.ResponseWriter, req *http.Request) {
+	if rand.Intn(10)%2 == 0 {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("500 - Something bad happened!"))
+	}
+	fmt.Println("healthz-but-sometimes-broken called")
+}
+
 func main() {
 	http.HandleFunc("/hi", hi)
 	http.HandleFunc("/pi", pi)
 	http.HandleFunc("/healthz", healthz)
+	http.HandleFunc("/healthz-but-broken", healthzButBroken)
+	http.HandleFunc("/healthz-but-sometimes-broken", healthzButSometimesBroken)
 
 	fmt.Println("Listening on port", os.Getenv("PORT"))
 	err := http.ListenAndServe(fmt.Sprintf(":%s", os.Getenv("PORT")), nil)
