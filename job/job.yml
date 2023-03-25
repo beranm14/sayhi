@@ -1,0 +1,12 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: generate-cats
+spec:
+  template:
+    spec:
+      containers:
+      - name: generate-cats
+        image: beranm14/sayhi-job
+      restartPolicy: Never
+  backoffLimit: 4
