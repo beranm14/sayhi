@@ -31,6 +31,16 @@ func pi(w http.ResponseWriter, req *http.Request) {
 	fmt.Fprintf(w, "%f\n", float64(totalIn)*4.0/float64(total))
 }
 
+func headers(w http.ResponseWriter, req *http.Request) {
+	fmt.Println("headers called")
+	for name, values := range req.Header {
+		for _, value := range values {
+			fmt.Println(name, value)
+			fmt.Fprintf(w, "%v %v\n", name, value)
+		}
+	}
+}
+
 func hi(w http.ResponseWriter, req *http.Request) {
 	fmt.Fprintf(w, "hi🐈\n")
 	fmt.Println("hi called")
@@ -57,6 +67,7 @@ func healthzButSometimesBroken(w http.ResponseWriter, req *http.Request) {
 
 func main() {
 	http.HandleFunc("/hi", hi)
+	http.HandleFunc("/headers", headers)
 	http.HandleFunc("/pi", pi)
 	http.HandleFunc("/healthz", healthz)
 	http.HandleFunc("/healthz-but-broken", healthzButBroken)
