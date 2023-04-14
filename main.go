@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"sync"
+	"time"
 )
 
 func pi(w http.ResponseWriter, req *http.Request) {
@@ -65,6 +67,23 @@ func healthzButSometimesBroken(w http.ResponseWriter, req *http.Request) {
 	fmt.Println("healthz-but-sometimes-broken called")
 }
 
+var lock sync.Mutex
+var count int
+
+func countCalls(w http.ResponseWriter, req *http.Request) {
+	n, err := strconv.Atoi(req.URL.Query().Get("n"))
+	if err != nil {
+		n = 0
+	}
+	if n > 0 {
+		time.Sleep(time.Duration(n) * time.Second)
+	}
+	lock.Lock()
+	count++
+	lock.Unlock()
+	fmt.Fprintf(w, "%d\n", count)
+}
+
 func main() {
 	http.HandleFunc("/hi", hi)
 	http.HandleFunc("/headers", headers)
@@ -72,6 +91,7 @@ func main() {
 	http.HandleFunc("/healthz", healthz)
 	http.HandleFunc("/healthz-but-broken", healthzButBroken)
 	http.HandleFunc("/healthz-but-sometimes-broken", healthzButSometimesBroken)
+	http.HandleFunc("/count", countCalls)
 
 	fmt.Println("Listening on port", os.Getenv("PORT"))
 	err := http.ListenAndServe(fmt.Sprintf(":%s", os.Getenv("PORT")), nil)
