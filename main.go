@@ -41,6 +41,7 @@ func headers(w http.ResponseWriter, req *http.Request) {
 			fmt.Fprintf(w, "%v %v\n", name, value)
 		}
 	}
+	fmt.Fprintf(w, "RemoteAddr, %v\n", req.RemoteAddr)
 }
 
 func hi(w http.ResponseWriter, req *http.Request) {
